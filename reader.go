@@ -1,6 +1,7 @@
 package wav
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"
@@ -116,7 +117,7 @@ func (r *Reader) readData() (data *WavData, err error) {
 		return
 	}
 
-	data = &WavData{dataChunk}
+	data = &WavData{bufio.NewReader(dataChunk), dataChunk.ChunkSize}
 
 	return
 }

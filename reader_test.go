@@ -65,7 +65,7 @@ func TestRead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(bytes) != int(wav.WavData.Chunk.ChunkSize)-(1*blockAlign) {
+	if len(bytes) != int(wav.WavData.Size)-(1*blockAlign) {
 		t.Fatalf("Data size is invalid: %d", len(bytes))
 	}
 

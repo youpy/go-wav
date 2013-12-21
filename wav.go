@@ -2,7 +2,7 @@ package wav
 
 import (
 	"errors"
-	riff "github.com/youpy/go-riff"
+	"io"
 )
 
 const (
@@ -19,7 +19,8 @@ type WavFormat struct {
 }
 
 type WavData struct {
-	*riff.Chunk
+	io.Reader
+	Size uint32
 }
 
 type Wav struct {
