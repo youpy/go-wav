@@ -2,7 +2,6 @@ package wav
 
 import (
 	"encoding/binary"
-	// "fmt"
 	"io"
 	"math"
 )
@@ -58,10 +57,6 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	if wav.WavData.Size < wav.WavData.Pos+(n*uint32(format.BlockAlign)) {
 		n = (wav.WavData.Size - wav.WavData.Pos) / uint32(format.BlockAlign)
 	}
-
-	// fmt.Printf("WavData.Size: %d\n", wav.WavData.Size)
-	// fmt.Printf("WavData.Pos: %d\n", wav.WavData.Pos)
-	// fmt.Printf("n: %d\n", n)
 
 	if n == 0 {
 		err = io.EOF
