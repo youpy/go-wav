@@ -3,6 +3,7 @@ package wav
 import (
 	"errors"
 	"io"
+	"math"
 )
 
 const (
@@ -29,16 +30,16 @@ type Wav struct {
 }
 
 type Sample struct {
-	BitsPerSample uint
-	NumChannels   uint
+	BitsPerSample uint16
+	NumChannels   uint16
 	values        []int
 }
 
 func (wav *Wav) ReadSample() (sample Sample, err error) {
 	format := wav.Format
-	numChannels := uint(format.NumChannels)
-	bitsPerSample := uint(format.BitsPerSample)
-	blockAlign := int(format.BlockAlign)
+	numChannels := format.NumChannels
+	bitsPerSample := format.BitsPerSample
+	blockAlign := format.BlockAlign
 
 	values := make([]int, format.NumChannels)
 	bytes := make([]byte, format.BlockAlign)
@@ -48,7 +49,7 @@ func (wav *Wav) ReadSample() (sample Sample, err error) {
 		return
 	}
 
-	if n != blockAlign {
+	if n != int(blockAlign) {
 		err = errors.New("Invalid length of bytes")
 		return
 	}
@@ -68,4 +69,8 @@ func (wav *Wav) ReadSample() (sample Sample, err error) {
 
 func (s Sample) IntValue(channel uint) int {
 	return s.values[channel]
+}
+
+func (s Sample) FloatValue(channel uint) float64 {
+	return float64(s.values[channel]) / math.Pow(2, float64(s.BitsPerSample))
 }

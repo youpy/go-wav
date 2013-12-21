@@ -3,6 +3,7 @@ package wav
 import (
 	"io"
 	"io/ioutil"
+	"math"
 	"testing"
 )
 
@@ -58,6 +59,14 @@ func TestRead(t *testing.T) {
 
 	if sample.IntValue(1) != 289 {
 		t.Fatalf("Value is invalid: %d", sample.IntValue(1))
+	}
+
+	if math.Abs(sample.FloatValue(0)-0.004852) > 0.0001 {
+		t.Fatalf("Value is invalid: %f", sample.FloatValue(0))
+	}
+
+	if math.Abs(sample.FloatValue(1)-0.004409) > 0.0001 {
+		t.Fatalf("Value is invalid: %d", sample.FloatValue(1))
 	}
 
 	bytes, err = ioutil.ReadAll(wav)
