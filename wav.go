@@ -1,7 +1,7 @@
 package wav
 
 import (
-	"errors"
+	"encoding/binary"
 	"io"
 	"math"
 )
@@ -36,29 +36,30 @@ type Sample struct {
 }
 
 func (wav *Wav) ReadSample() (sample Sample, err error) {
+	var value16 int16
+	var value8 int8
+
 	format := wav.Format
 	numChannels := format.NumChannels
 	bitsPerSample := format.BitsPerSample
-	blockAlign := format.BlockAlign
 
 	values := make([]int, format.NumChannels)
-	bytes := make([]byte, format.BlockAlign)
-
-	n, err := wav.WavData.Read(bytes)
-	if err != nil {
-		return
-	}
-
-	if n != int(blockAlign) {
-		err = errors.New("Invalid length of bytes")
-		return
-	}
 
 	for i := 0; i < int(numChannels); i++ {
-		bytesForChannel := bytes[(i * int(bitsPerSample) / 8) : (i*int(bitsPerSample)/8)+(int(bitsPerSample)/8)]
+		if bitsPerSample == 16 {
+			err = binary.Read(wav.WavData, binary.LittleEndian, &value16)
+			if err != nil {
+				return
+			}
 
-		for j := 0; j < len(bytesForChannel); j++ {
-			values[i] += int(bytesForChannel[j]) << uint(8*j)
+			values[i] = int(value16)
+		} else { // 8bit
+			err = binary.Read(wav.WavData, binary.LittleEndian, &value8)
+			if err != nil {
+				return
+			}
+
+			values[i] = int(value16)
 		}
 	}
 
