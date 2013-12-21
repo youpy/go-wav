@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-  infile_path := flag.String("infile", "", "wav file to read")
+	infil_epath := flag.String("infile", "", "wav file to read")
 	flag.Parse()
 
 	file, _ := os.Open(*infile_path)
