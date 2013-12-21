@@ -49,9 +49,8 @@ func TestRead(t *testing.T) {
 		t.Fatalf("Bits per sample is invalid: %d", fmt.BitsPerSample)
 	}
 
-	var bytes []byte
-
-	sample, err := wav.ReadSample()
+	samples, err := wav.ReadSamples(1)
+	sample := samples[0]
 
 	if sample.IntValue(0) != 318 {
 		t.Fatalf("Value is invalid: %d", sample.IntValue(0))
@@ -69,7 +68,7 @@ func TestRead(t *testing.T) {
 		t.Fatalf("Value is invalid: %d", sample.FloatValue(1))
 	}
 
-	bytes, err = ioutil.ReadAll(wav)
+	bytes, err := ioutil.ReadAll(wav)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +95,8 @@ func BenchmarkRead(b *testing.B) {
 	}
 
 	for {
-		_, err := wav.ReadSample()
+		_, err := wav.ReadSamples()
+
 		if err == io.EOF {
 			break
 		}
