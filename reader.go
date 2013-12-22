@@ -2,11 +2,9 @@ package wav
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/binary"
 	"errors"
 	riff "github.com/youpy/go-riff"
-	"io/ioutil"
 )
 
 type Reader struct {
@@ -58,13 +56,7 @@ func (r *Reader) readFormat() (fmt *WavFormat, err error) {
 		return
 	}
 
-	b, err := ioutil.ReadAll(fmtChunk)
-	if err != nil {
-		return
-	}
-
-	buf := bytes.NewReader(b)
-	err = binary.Read(buf, binary.LittleEndian, fmt)
+	err = binary.Read(fmtChunk, binary.LittleEndian, fmt)
 	if err != nil {
 		return
 	}
