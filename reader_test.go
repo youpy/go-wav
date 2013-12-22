@@ -49,6 +49,11 @@ func TestRead(t *testing.T) {
 	}
 
 	samples, err := wav.ReadSamples(1)
+
+	if len(samples) != 1 {
+		t.Fatalf("Length of samples is invalid: %d", len(samples))
+	}
+
 	sample := samples[0]
 
 	if wav.IntValue(sample, 0) != 318 {

@@ -36,6 +36,18 @@ func main() {
 }
 ```
 
+## Supported format
+
+Number of channels
+
+- 1(mono)
+- 2(stereo)
+
+Bits per sample
+
+- 16bit
+- 8bit
+
 ## Documentation
 
 - https://godoc.org/github.com/youpy/go-wav

@@ -1,7 +1,6 @@
 package wav
 
 import (
-	"encoding/binary"
 	"io"
 	"math"
 )
@@ -31,19 +30,17 @@ type Wav struct {
 }
 
 type Sample struct {
-	values8  []int8
-	values16 []int16
+	Values [2]int
 }
 
 func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
-	var values8 []int8
-	var values16 []int16
-	var n uint32
+	var bytes []byte
+	var numSamples, n int
 
 	if len(params) > 0 {
-		n = params[0]
+		numSamples = int(params[0])
 	} else {
-		n = 2048
+		numSamples = 2048
 	}
 
 	format := wav.Format
@@ -51,55 +48,38 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	blockAlign := uint32(format.BlockAlign)
 	bitsPerSample := format.BitsPerSample
 
-	if wav.WavData.Size < wav.WavData.pos+(n*blockAlign) {
-		n = (wav.WavData.Size - wav.WavData.pos) / blockAlign
-	}
-
-	if n == 0 {
-		err = io.EOF
-		return
-	}
-
-	if bitsPerSample == 16 {
-		values16 = make([]int16, numChannels*n)
-		err = binary.Read(wav.WavData, binary.LittleEndian, &values16)
-	} else { // assumes 8bit
-		values8 = make([]int8, numChannels*n)
-		err = binary.Read(wav.WavData, binary.LittleEndian, &values8)
-	}
+	bytes = make([]byte, numChannels*uint32(numSamples)*(uint32(bitsPerSample)/8))
+	n, err = wav.WavData.Read(bytes)
 
 	if err != nil {
 		return
 	}
 
-	wav.WavData.pos += n * blockAlign
+	numSamples = n / int(blockAlign)
+	wav.WavData.pos += uint32(numSamples) * blockAlign
+	samples = make([]Sample, numSamples)
 
-	samples = make([]Sample, n)
+	var offset int = 0
 
-	var i uint32
-	var offset uint32 = 0
-
-	for i = 0; i < n; i++ {
+	for i := 0; i < numSamples; i++ {
 		if bitsPerSample == 16 {
-			samples[i].values16 = values16[offset : offset+numChannels]
+			for j := 0; j < int(numChannels); j++ {
+				samples[i].Values[j] = int((int16(bytes[offset+(j*2)+1]) << 8) + int16(bytes[offset+(j*2)]))
+			}
 		} else {
-			samples[i].values8 = values8[offset : offset+numChannels]
+			for j := 0; j < int(numChannels); j++ {
+				samples[i].Values[j] = int(bytes[offset+j])
+			}
 		}
 
-		offset += numChannels
+		offset += int(numChannels) * (int(bitsPerSample) / 8)
 	}
 
 	return
 }
 
-func (wav *Wav) IntValue(sample Sample, channel uint) (value int) {
-	if wav.Format.BitsPerSample == 16 {
-		value = int(sample.values16[channel])
-	} else {
-		value = int(sample.values8[channel])
-	}
-
-	return
+func (wav *Wav) IntValue(sample Sample, channel uint) int {
+	return sample.Values[channel]
 }
 
 func (wav *Wav) FloatValue(sample Sample, channel uint) float64 {
