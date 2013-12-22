@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	infil_epath := flag.String("infile", "", "wav file to read")
+	infile_epath := flag.String("infile", "", "wav file to read")
 	flag.Parse()
 
 	file, _ := os.Open(*infile_path)
@@ -30,8 +30,12 @@ func main() {
 		}
 
 		for _, sample := range samples {
-			fmt.Printf("L/R: %d/%d\n", sample.IntValue(0), sample.IntValue(1))
+			fmt.Printf("L/R: %d/%d\n", wav.IntValue(sample, 0), wav.IntValue(sample, 1))
 		}
 	}
 }
 ```
+
+## Documentation
+
+- https://godoc.org/github.com/youpy/go-wav
