@@ -64,32 +64,7 @@ func (r *Reader) readFormat() (fmt *WavFormat, err error) {
 	}
 
 	buf := bytes.NewReader(b)
-	err = binary.Read(buf, binary.LittleEndian, &fmt.AudioFormat)
-	if err != nil {
-		return
-	}
-
-	err = binary.Read(buf, binary.LittleEndian, &fmt.NumChannels)
-	if err != nil {
-		return
-	}
-
-	err = binary.Read(buf, binary.LittleEndian, &fmt.SampleRate)
-	if err != nil {
-		return
-	}
-
-	err = binary.Read(buf, binary.LittleEndian, &fmt.ByteRate)
-	if err != nil {
-		return
-	}
-
-	err = binary.Read(buf, binary.LittleEndian, &fmt.BlockAlign)
-	if err != nil {
-		return
-	}
-
-	err = binary.Read(buf, binary.LittleEndian, &fmt.BitsPerSample)
+	err = binary.Read(buf, binary.LittleEndian, fmt)
 	if err != nil {
 		return
 	}
