@@ -1,7 +1,6 @@
 package wav
 
 import (
-	"io"
 	"io/ioutil"
 	"math"
 	"testing"
@@ -52,20 +51,20 @@ func TestRead(t *testing.T) {
 	samples, err := wav.ReadSamples(1)
 	sample := samples[0]
 
-	if sample.IntValue(0) != 318 {
-		t.Fatalf("Value is invalid: %d", sample.IntValue(0))
+	if wav.IntValue(sample, 0) != 318 {
+		t.Fatalf("Value is invalid: %d", wav.IntValue(sample, 0))
 	}
 
-	if sample.IntValue(1) != 289 {
-		t.Fatalf("Value is invalid: %d", sample.IntValue(1))
+	if wav.IntValue(sample, 1) != 289 {
+		t.Fatalf("Value is invalid: %d", wav.IntValue(sample, 1))
 	}
 
-	if math.Abs(sample.FloatValue(0)-0.004852) > 0.0001 {
-		t.Fatalf("Value is invalid: %f", sample.FloatValue(0))
+	if math.Abs(wav.FloatValue(sample, 0)-0.004852) > 0.0001 {
+		t.Fatalf("Value is invalid: %f", wav.FloatValue(sample, 0))
 	}
 
-	if math.Abs(sample.FloatValue(1)-0.004409) > 0.0001 {
-		t.Fatalf("Value is invalid: %d", sample.FloatValue(1))
+	if math.Abs(wav.FloatValue(sample, 1)-0.004409) > 0.0001 {
+		t.Fatalf("Value is invalid: %d", wav.FloatValue(sample, 1))
 	}
 
 	bytes, err := ioutil.ReadAll(wav)
@@ -78,27 +77,4 @@ func TestRead(t *testing.T) {
 	}
 
 	t.Logf("Data size: %d", len(bytes))
-}
-
-func BenchmarkRead(b *testing.B) {
-	file, err := fixtureFile("a.wav")
-
-	if err != nil {
-		b.Fatalf("Failed to open fixture file")
-	}
-
-	reader := NewReader(file)
-
-	wav, err := reader.Read()
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	for {
-		_, err := wav.ReadSamples()
-
-		if err == io.EOF {
-			break
-		}
-	}
 }

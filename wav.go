@@ -31,10 +31,8 @@ type Wav struct {
 }
 
 type Sample struct {
-	BitsPerSample uint16
-	NumChannels   uint16
-	values8       []int8
-	values16      []int16
+	values8  []int8
+	values16 []int16
 }
 
 func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
@@ -45,17 +43,16 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	if len(params) > 0 {
 		n = params[0]
 	} else {
-		n = 1024
+		n = 2048
 	}
-
-	samples = make([]Sample, 0)
 
 	format := wav.Format
 	numChannels := uint32(format.NumChannels)
+	blockAlign := uint32(format.BlockAlign)
 	bitsPerSample := format.BitsPerSample
 
-	if wav.WavData.Size < wav.WavData.Pos+(n*uint32(format.BlockAlign)) {
-		n = (wav.WavData.Size - wav.WavData.Pos) / uint32(format.BlockAlign)
+	if wav.WavData.Size < wav.WavData.Pos+(n*blockAlign) {
+		n = (wav.WavData.Size - wav.WavData.Pos) / blockAlign
 	}
 
 	if n == 0 {
@@ -75,34 +72,32 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 		return
 	}
 
-	wav.WavData.Pos += n * uint32(format.BlockAlign)
+	wav.WavData.Pos += n * blockAlign
+
+	samples = make([]Sample, n)
 
 	var i uint32
 	for i = 0; i < n; i++ {
 		if bitsPerSample == 16 {
-			samples = append(
-				samples,
-				Sample{BitsPerSample: bitsPerSample, NumChannels: uint16(numChannels), values16: values16[i*numChannels : i*numChannels+numChannels]})
+			samples[i].values16 = values16[i*numChannels : i*numChannels+numChannels]
 		} else {
-			samples = append(
-				samples,
-				Sample{BitsPerSample: bitsPerSample, NumChannels: uint16(numChannels), values8: values8[i*numChannels : i*numChannels+numChannels]})
+			samples[i].values8 = values8[i*numChannels : i*numChannels+numChannels]
 		}
 	}
 
 	return
 }
 
-func (s Sample) IntValue(channel uint) (value int) {
-	if s.BitsPerSample == 16 {
-		value = int(s.values16[channel])
+func (wav *Wav) IntValue(sample Sample, channel uint) (value int) {
+	if wav.Format.BitsPerSample == 16 {
+		value = int(sample.values16[channel])
 	} else {
-		value = int(s.values8[channel])
+		value = int(sample.values8[channel])
 	}
 
 	return
 }
 
-func (s Sample) FloatValue(channel uint) float64 {
-	return float64(s.IntValue(channel)) / math.Pow(2, float64(s.BitsPerSample))
+func (wav *Wav) FloatValue(sample Sample, channel uint) float64 {
+	return float64(wav.IntValue(sample, channel)) / math.Pow(2, float64(wav.Format.BitsPerSample))
 }
