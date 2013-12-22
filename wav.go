@@ -77,12 +77,16 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	samples = make([]Sample, n)
 
 	var i uint32
+	var offset uint32 = 0
+
 	for i = 0; i < n; i++ {
 		if bitsPerSample == 16 {
-			samples[i].values16 = values16[i*numChannels : i*numChannels+numChannels]
+			samples[i].values16 = values16[offset : offset+numChannels]
 		} else {
-			samples[i].values8 = values8[i*numChannels : i*numChannels+numChannels]
+			samples[i].values8 = values8[offset : offset+numChannels]
 		}
+
+		offset += numChannels
 	}
 
 	return
