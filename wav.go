@@ -21,8 +21,8 @@ type WavFormat struct {
 
 type WavData struct {
 	io.Reader
-	Pos  uint32
 	Size uint32
+	pos  uint32
 }
 
 type Wav struct {
@@ -51,8 +51,8 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	blockAlign := uint32(format.BlockAlign)
 	bitsPerSample := format.BitsPerSample
 
-	if wav.WavData.Size < wav.WavData.Pos+(n*blockAlign) {
-		n = (wav.WavData.Size - wav.WavData.Pos) / blockAlign
+	if wav.WavData.Size < wav.WavData.pos+(n*blockAlign) {
+		n = (wav.WavData.Size - wav.WavData.pos) / blockAlign
 	}
 
 	if n == 0 {
@@ -72,7 +72,7 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 		return
 	}
 
-	wav.WavData.Pos += n * blockAlign
+	wav.WavData.pos += n * blockAlign
 
 	samples = make([]Sample, n)
 

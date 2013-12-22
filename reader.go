@@ -117,7 +117,7 @@ func (r *Reader) readData() (data *WavData, err error) {
 		return
 	}
 
-	data = &WavData{bufio.NewReader(dataChunk), 0, dataChunk.ChunkSize}
+	data = &WavData{bufio.NewReader(dataChunk), dataChunk.ChunkSize, 0}
 
 	return
 }
