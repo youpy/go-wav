@@ -21,19 +21,17 @@ func main() {
 		result := testing.Benchmark(func(b *testing.B) {
 			file, _ := os.Open(*infile_epath)
 			reader := wav.NewReader(file)
-			wav, _ := reader.Read()
 
 			for {
-				samples, err := wav.ReadSamples(numSamples)
+				samples, err := reader.ReadSamples(numSamples)
 				if err == io.EOF {
 					break
 				}
 				for _, sample := range samples {
-					t += wav.IntValue(sample, 0)
-					t += wav.IntValue(sample, 1)
+					t += reader.IntValue(sample, 0)
+					t += reader.IntValue(sample, 1)
 				}
 			}
-
 		})
 		fmt.Printf("ReadSamples(%d): \t%s\n", numSamples, result.String())
 	}
