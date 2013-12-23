@@ -16,21 +16,20 @@ import (
 )
 
 func main() {
-	infile_epath := flag.String("infile", "", "wav file to read")
+	infile_path := flag.String("infile", "", "wav file to read")
 	flag.Parse()
 
 	file, _ := os.Open(*infile_path)
 	reader := wav.NewReader(file)
-	wav, _ := reader.Read()
 
 	for {
-		samples, err := wav.ReadSamples()
+		samples, err := reader.ReadSamples()
 		if err == io.EOF {
 			break
 		}
 
 		for _, sample := range samples {
-			fmt.Printf("L/R: %d/%d\n", wav.IntValue(sample, 0), wav.IntValue(sample, 1))
+			fmt.Printf("L/R: %d/%d\n", reader.IntValue(sample, 0), reader.IntValue(sample, 1))
 		}
 	}
 }

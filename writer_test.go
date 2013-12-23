@@ -48,12 +48,14 @@ func TestWrite(t *testing.T) {
 	}()
 
 	reader := NewReader(file)
-	wav, err := reader.Read()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt := wav.Format
+	fmt, err := reader.Format()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	assert.Equal(t, int(fmt.AudioFormat), AudioFormatPCM)
 	assert.Equal(t, fmt.NumChannels, numChannels)
@@ -62,7 +64,7 @@ func TestWrite(t *testing.T) {
 	assert.Equal(t, fmt.BlockAlign, numChannels*(bitsPerSample/8))
 	assert.Equal(t, fmt.BitsPerSample, bitsPerSample)
 
-	samples, err = wav.ReadSamples()
+	samples, err = reader.ReadSamples()
 	if err != nil {
 		t.Fatal(err)
 	}

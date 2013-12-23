@@ -16,13 +16,10 @@ func TestRead(t *testing.T) {
 	}
 
 	reader := NewReader(file)
-
-	wav, err := reader.Read()
+	fmt, err := reader.Format()
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fmt := wav.Format
 
 	if fmt.AudioFormat != AudioFormatPCM {
 		t.Fatalf("Audio format is invalid: %d", fmt.AudioFormat)
@@ -48,7 +45,7 @@ func TestRead(t *testing.T) {
 		t.Fatalf("Bits per sample is invalid: %d", fmt.BitsPerSample)
 	}
 
-	samples, err := wav.ReadSamples(1)
+	samples, err := reader.ReadSamples(1)
 
 	if len(samples) != 1 {
 		t.Fatalf("Length of samples is invalid: %d", len(samples))
@@ -56,28 +53,28 @@ func TestRead(t *testing.T) {
 
 	sample := samples[0]
 
-	if wav.IntValue(sample, 0) != 318 {
-		t.Fatalf("Value is invalid: %d", wav.IntValue(sample, 0))
+	if reader.IntValue(sample, 0) != 318 {
+		t.Fatalf("Value is invalid: %d", reader.IntValue(sample, 0))
 	}
 
-	if wav.IntValue(sample, 1) != 289 {
-		t.Fatalf("Value is invalid: %d", wav.IntValue(sample, 1))
+	if reader.IntValue(sample, 1) != 289 {
+		t.Fatalf("Value is invalid: %d", reader.IntValue(sample, 1))
 	}
 
-	if math.Abs(wav.FloatValue(sample, 0)-0.004852) > 0.0001 {
-		t.Fatalf("Value is invalid: %f", wav.FloatValue(sample, 0))
+	if math.Abs(reader.FloatValue(sample, 0)-0.004852) > 0.0001 {
+		t.Fatalf("Value is invalid: %f", reader.FloatValue(sample, 0))
 	}
 
-	if math.Abs(wav.FloatValue(sample, 1)-0.004409) > 0.0001 {
-		t.Fatalf("Value is invalid: %d", wav.FloatValue(sample, 1))
+	if math.Abs(reader.FloatValue(sample, 1)-0.004409) > 0.0001 {
+		t.Fatalf("Value is invalid: %d", reader.FloatValue(sample, 1))
 	}
 
-	bytes, err := ioutil.ReadAll(wav)
+	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(bytes) != int(wav.WavData.Size)-(1*blockAlign) {
+	if len(bytes) != int(reader.WavData.Size)-(1*blockAlign) {
 		t.Fatalf("Data size is invalid: %d", len(bytes))
 	}
 
