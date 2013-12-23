@@ -44,27 +44,28 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	}
 
 	format := wav.Format
-	numChannels := uint32(format.NumChannels)
-	blockAlign := uint32(format.BlockAlign)
-	bitsPerSample := format.BitsPerSample
+	numChannels := int(format.NumChannels)
+	blockAlign := int(format.BlockAlign)
+	bitsPerSample := int(format.BitsPerSample)
 
-	bytes = make([]byte, numChannels*uint32(numSamples)*(uint32(bitsPerSample)/8))
+	bytes = make([]byte, numSamples*blockAlign)
 	n, err = wav.WavData.Read(bytes)
 
 	if err != nil {
 		return
 	}
 
-	numSamples = n / int(blockAlign)
-	wav.WavData.pos += uint32(numSamples) * blockAlign
+	numSamples = n / blockAlign
+	wav.WavData.pos += uint32(numSamples * blockAlign)
 	samples = make([]Sample, numSamples)
 
-	var offset int = 0
+	offset := 0
 
 	for i := 0; i < numSamples; i++ {
 		if bitsPerSample == 16 {
 			for j := 0; j < int(numChannels); j++ {
-				samples[i].Values[j] = int((int16(bytes[offset+(j*2)+1]) << 8) + int16(bytes[offset+(j*2)]))
+				soffset := offset + (j * numChannels)
+				samples[i].Values[j] = int((int16(bytes[soffset+1]) << 8) + int16(bytes[soffset]))
 			}
 		} else {
 			for j := 0; j < int(numChannels); j++ {
@@ -72,7 +73,7 @@ func (wav *Wav) ReadSamples(params ...uint32) (samples []Sample, err error) {
 			}
 		}
 
-		offset += int(numChannels) * (int(bitsPerSample) / 8)
+		offset += blockAlign
 	}
 
 	return
