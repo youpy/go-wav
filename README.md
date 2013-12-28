@@ -22,6 +22,8 @@ func main() {
 	file, _ := os.Open(*infile_path)
 	reader := wav.NewReader(file)
 
+  defer file.Close()
+
 	for {
 		samples, err := reader.ReadSamples()
 		if err == io.EOF {
