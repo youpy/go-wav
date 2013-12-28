@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
-	riff "github.com/youpy/go-riff"
+	"github.com/youpy/go-riff"
 	"math"
 )
 

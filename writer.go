@@ -2,7 +2,7 @@ package wav
 
 import (
 	"encoding/binary"
-	riff "github.com/youpy/go-riff"
+	"github.com/youpy/go-riff"
 	"io"
 )
 
