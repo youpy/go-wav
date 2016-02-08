@@ -2,8 +2,10 @@ package wav
 
 import (
 	"encoding/binary"
-	"github.com/youpy/go-riff"
 	"io"
+	"math"
+
+	"github.com/youpy/go-riff"
 )
 
 type Writer struct {
@@ -32,18 +34,13 @@ func (w *Writer) WriteSamples(samples []Sample) (err error) {
 	bitsPerSample := w.Format.BitsPerSample
 	numChannels := w.Format.NumChannels
 
-	var i uint16
+	var i, b uint16
 	for _, sample := range samples {
-		if bitsPerSample == 16 {
-			for i = 0; i < numChannels; i++ {
-				err = binary.Write(w, binary.LittleEndian, int16(sample.Values[i]))
-				if err != nil {
-					return
-				}
-			}
-		} else {
-			for i = 0; i < numChannels; i++ {
-				binary.Write(w, binary.LittleEndian, int8(sample.Values[i]))
+		for i = 0; i < numChannels; i++ {
+			value := toUint(sample.Values[i], int(bitsPerSample))
+
+			for b = 0; b < bitsPerSample; b += 8 {
+				err = binary.Write(w, binary.LittleEndian, uint8((value>>b)&math.MaxUint8))
 				if err != nil {
 					return
 				}
@@ -52,4 +49,25 @@ func (w *Writer) WriteSamples(samples []Sample) (err error) {
 	}
 
 	return
+}
+
+func toUint(value int, bits int) uint {
+	var result uint
+
+	switch bits {
+	case 32:
+		result = uint(uint32(value))
+	case 16:
+		result = uint(uint16(value))
+	case 8:
+		result = uint(value)
+	default:
+		if value < 0 {
+			result = uint((1 << uint(bits)) + value)
+		} else {
+			result = uint(value)
+		}
+	}
+
+	return result
 }

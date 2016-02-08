@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	AudioFormatPCM = 1
+	AudioFormatPCM       = 1
+	AudioFormatIEEEFloat = 3
 )
 
 type WavFormat struct {
