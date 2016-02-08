@@ -42,7 +42,7 @@ func main() {
 Format
 
 - PCM
-- IEEE float
+- IEEE float (read-only)
 
 Number of channels
 
