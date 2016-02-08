@@ -39,6 +39,11 @@ func main() {
 
 ## Supported format
 
+Format
+
+- PCM
+- IEEE float
+
 Number of channels
 
 - 1(mono)
@@ -46,9 +51,16 @@ Number of channels
 
 Bits per sample
 
-- 16bit
-- 8bit
+- 32-bit
+- 24-bit
+- 16-bit
+- 8-bit
 
 ## Documentation
 
 - https://godoc.org/github.com/youpy/go-wav
+
+## See Also
+
+- http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
+
