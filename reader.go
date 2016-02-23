@@ -78,9 +78,9 @@ func (r *Reader) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	samples = make([]Sample, numSamples)
 	offset := 0
 
-	for i := 0; i < int(numSamples); i++ {
+	for i := 0; i < numSamples; i++ {
 		if format.AudioFormat == AudioFormatIEEEFloat {
-			for j := 0; j < int(numChannels); j++ {
+			for j := 0; j < numChannels; j++ {
 				soffset := offset + (j * bitsPerSample / 8)
 
 				bits :=
