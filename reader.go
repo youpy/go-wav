@@ -114,8 +114,7 @@ func (r *Reader) IntValue(sample Sample, channel uint) int {
 }
 
 func (r *Reader) FloatValue(sample Sample, channel uint) float64 {
-	// XXX
-	return float64(r.IntValue(sample, channel)) / math.Pow(2, float64(r.format.BitsPerSample))
+	return float64(r.IntValue(sample, channel)) / math.Pow(2, float64(r.format.BitsPerSample)-1)
 }
 
 func (r *Reader) readFormat() (fmt *WavFormat, err error) {
