@@ -66,7 +66,7 @@ func TestRead(t *testing.T) {
 	}
 
 	if math.Abs(reader.FloatValue(sample, 1)-0.004409) > 0.0001 {
-		t.Fatalf("Value is invalid: %d", reader.FloatValue(sample, 1))
+		t.Fatalf("Value is invalid: %f", reader.FloatValue(sample, 1))
 	}
 
 	bytes, err := ioutil.ReadAll(reader)
