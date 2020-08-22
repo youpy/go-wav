@@ -61,11 +61,11 @@ func TestRead(t *testing.T) {
 		t.Fatalf("Value is invalid: %d", reader.IntValue(sample, 1))
 	}
 
-	if math.Abs(reader.FloatValue(sample, 0)-0.004852) > 0.0001 {
+	if math.Abs(reader.FloatValue(sample, 0)-0.009705) > 0.0001 {
 		t.Fatalf("Value is invalid: %f", reader.FloatValue(sample, 0))
 	}
 
-	if math.Abs(reader.FloatValue(sample, 1)-0.004409) > 0.0001 {
+	if math.Abs(reader.FloatValue(sample, 1)-0.008820) > 0.0001 {
 		t.Fatalf("Value is invalid: %f", reader.FloatValue(sample, 1))
 	}
 
