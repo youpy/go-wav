@@ -4,13 +4,14 @@ import (
 	"io/ioutil"
 	"math"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 func TestRead(t *testing.T) {
 	blockAlign := 4
 
 	file, err := fixtureFile("a.wav")
-
 	if err != nil {
 		t.Fatalf("Failed to open fixture file")
 	}
@@ -21,62 +22,109 @@ func TestRead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if fmt.AudioFormat != AudioFormatPCM {
-		t.Fatalf("Audio format is invalid: %d", fmt.AudioFormat)
-	}
-
-	if fmt.NumChannels != 2 {
-		t.Fatalf("Number of channels is invalid: %d", fmt.NumChannels)
-	}
-
-	if fmt.SampleRate != 44100 {
-		t.Fatalf("Sample rate is invalid: %d", fmt.SampleRate)
-	}
-
-	if fmt.ByteRate != 44100*4 {
-		t.Fatalf("Byte rate is invalid: %d", fmt.ByteRate)
-	}
-
-	if int(fmt.BlockAlign) != blockAlign {
-		t.Fatalf("Block align is invalid: %d", fmt.BlockAlign)
-	}
-
-	if fmt.BitsPerSample != 16 {
-		t.Fatalf("Bits per sample is invalid: %d", fmt.BitsPerSample)
-	}
+	assert.Equal(t, AudioFormatPCM, int(fmt.AudioFormat))
+	assert.Equal(t, 2, int(fmt.NumChannels))
+	assert.Equal(t, 44100, int(fmt.SampleRate))
+	assert.Equal(t, 44100*4, int(fmt.ByteRate))
+	assert.Equal(t, blockAlign, int(fmt.BlockAlign))
+	assert.Equal(t, 16, int(fmt.BitsPerSample))
 
 	samples, err := reader.ReadSamples(1)
-
-	if len(samples) != 1 {
-		t.Fatalf("Length of samples is invalid: %d", len(samples))
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	assert.Equal(t, 1, len(samples))
 
 	sample := samples[0]
 
-	if reader.IntValue(sample, 0) != 318 {
-		t.Fatalf("Value is invalid: %d", reader.IntValue(sample, 0))
-	}
-
-	if reader.IntValue(sample, 1) != 289 {
-		t.Fatalf("Value is invalid: %d", reader.IntValue(sample, 1))
-	}
-
-	if math.Abs(reader.FloatValue(sample, 0)-0.009705) > 0.0001 {
-		t.Fatalf("Value is invalid: %f", reader.FloatValue(sample, 0))
-	}
-
-	if math.Abs(reader.FloatValue(sample, 1)-0.008820) > 0.0001 {
-		t.Fatalf("Value is invalid: %f", reader.FloatValue(sample, 1))
-	}
+	assert.Equal(t, 318, reader.IntValue(sample, 0))
+	assert.Equal(t, 289, reader.IntValue(sample, 1))
+	assert.Assert(t, math.Abs(reader.FloatValue(sample, 0)-0.009705) <= 0.0001)
+	assert.Assert(t, math.Abs(reader.FloatValue(sample, 1)-0.008820) <= 0.0001)
 
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(bytes) != int(reader.WavData.Size)-(1*blockAlign) {
-		t.Fatalf("Data size is invalid: %d", len(bytes))
+	assert.Equal(t, len(bytes), int(reader.WavData.Size)-(1*blockAlign))
+
+	t.Logf("Data size: %d", len(bytes))
+}
+
+func TestReadMulaw(t *testing.T) {
+	blockAlign := 1
+
+	file, err := fixtureFile("mulaw.wav")
+	if err != nil {
+		t.Fatalf("Failed to open fixture file")
 	}
+
+	reader := NewReader(file)
+	fmt, err := reader.Format()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, AudioFormatMULaw, int(fmt.AudioFormat))
+	assert.Equal(t, 1, int(fmt.NumChannels))
+	assert.Equal(t, 8000, int(fmt.SampleRate))
+	assert.Equal(t, 8000, int(fmt.ByteRate))
+	assert.Equal(t, blockAlign, int(fmt.BlockAlign))
+	assert.Equal(t, 8, int(fmt.BitsPerSample))
+
+	samples, err := reader.ReadSamples(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, 1, len(samples))
+
+	bytes, err := ioutil.ReadAll(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, len(bytes), int(reader.WavData.Size)-(1*blockAlign))
+
+	t.Logf("Data size: %d", len(bytes))
+}
+
+func TestReadAlaw(t *testing.T) {
+	blockAlign := 1
+
+	file, err := fixtureFile("alaw.wav")
+	if err != nil {
+		t.Fatalf("Failed to open fixture file")
+	}
+
+	reader := NewReader(file)
+	fmt, err := reader.Format()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, AudioFormatALaw, int(fmt.AudioFormat))
+	assert.Equal(t, 1, int(fmt.NumChannels))
+	assert.Equal(t, 8000, int(fmt.SampleRate))
+	assert.Equal(t, 8000, int(fmt.ByteRate))
+	assert.Equal(t, blockAlign, int(fmt.BlockAlign))
+	assert.Equal(t, 8, int(fmt.BitsPerSample))
+
+	samples, err := reader.ReadSamples(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, 1, len(samples))
+
+	bytes, err := ioutil.ReadAll(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, len(bytes), int(reader.WavData.Size)-(1*blockAlign))
 
 	t.Logf("Data size: %d", len(bytes))
 }
