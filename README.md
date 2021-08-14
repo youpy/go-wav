@@ -43,6 +43,8 @@ Format
 
 - PCM
 - IEEE float (read-only)
+- G.711 A-law (read-only)
+- G.711 µ-law (read-only)
 
 Number of channels
 

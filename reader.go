@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/youpy/go-riff"
+	"github.com/zaf/g711"
 )
 
 type Reader struct {
@@ -79,21 +80,37 @@ func (r *Reader) ReadSamples(params ...uint32) (samples []Sample, err error) {
 	offset := 0
 
 	for i := 0; i < numSamples; i++ {
-		if format.AudioFormat == AudioFormatIEEEFloat {
-			for j := 0; j < numChannels; j++ {
-				soffset := offset + (j * bitsPerSample / 8)
+		for j := 0; j < numChannels; j++ {
+			soffset := offset + (j * bitsPerSample / 8)
 
+			switch format.AudioFormat {
+			case AudioFormatIEEEFloat:
 				bits :=
 					uint32((int(bytes[soffset+3]) << 24) +
 						(int(bytes[soffset+2]) << 16) +
 						(int(bytes[soffset+1]) << 8) +
 						int(bytes[soffset]))
 				samples[i].Values[j] = int(math.MaxInt32 * math.Float32frombits(bits))
-			}
-		} else {
-			for j := 0; j < numChannels; j++ {
-				soffset := offset + (j * bitsPerSample / 8)
 
+			case AudioFormatALaw:
+				var val uint
+				pcm := g711.DecodeAlaw(bytes[soffset : soffset+(bitsPerSample/8)])
+				for b = 0; b < len(pcm); b++ {
+					val += uint(pcm[b]) << uint(b*8)
+				}
+
+				samples[i].Values[j] = toInt(val, bitsPerSample*2)
+
+			case AudioFormatMULaw:
+				var val uint
+				pcm := g711.DecodeUlaw(bytes[soffset : soffset+(bitsPerSample/8)])
+				for b = 0; b < len(pcm); b++ {
+					val += uint(pcm[b]) << uint(b*8)
+				}
+
+				samples[i].Values[j] = toInt(val, bitsPerSample*2)
+
+			default:
 				var val uint
 				for b = 0; b*8 < bitsPerSample; b++ {
 					val += uint(bytes[soffset+b]) << uint(b*8)
