@@ -1,4 +1,4 @@
-# go-wav [![Build Status](https://travis-ci.org/youpy/go-wav.png?branch=master)](https://travis-ci.org/youpy/go-wav)
+# go-wav ![workflow status](https://github.com/youpy/go-wav/actions/workflows/go.yml/badge.svg)
 
 A Go library to read/write WAVE(RIFF waveform Audio) Format
 
