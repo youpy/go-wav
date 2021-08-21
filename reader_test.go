@@ -29,6 +29,13 @@ func TestRead(t *testing.T) {
 	assert.Equal(t, blockAlign, int(fmt.BlockAlign))
 	assert.Equal(t, 16, int(fmt.BitsPerSample))
 
+	duration, err := reader.Duration()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "1.381496598s", duration.String())
+
 	samples, err := reader.ReadSamples(1)
 	if err != nil {
 		t.Fatal(err)
@@ -74,6 +81,13 @@ func TestReadMulaw(t *testing.T) {
 	assert.Equal(t, blockAlign, int(fmt.BlockAlign))
 	assert.Equal(t, 8, int(fmt.BitsPerSample))
 
+	duration, err := reader.Duration()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "4.59125s", duration.String())
+
 	samples, err := reader.ReadSamples(1)
 	if err != nil {
 		t.Fatal(err)
@@ -111,6 +125,13 @@ func TestReadAlaw(t *testing.T) {
 	assert.Equal(t, 8000, int(fmt.ByteRate))
 	assert.Equal(t, blockAlign, int(fmt.BlockAlign))
 	assert.Equal(t, 8, int(fmt.BitsPerSample))
+
+	duration, err := reader.Duration()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "4.59125s", duration.String())
 
 	samples, err := reader.ReadSamples(1)
 	if err != nil {

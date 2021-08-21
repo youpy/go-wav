@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"math"
+	"time"
 
 	"github.com/youpy/go-riff"
 	"github.com/zaf/g711"
@@ -36,13 +37,26 @@ func (r *Reader) Format() (format *WavFormat, err error) {
 	return
 }
 
+func (r *Reader) Duration() (time.Duration, error) {
+	format, err := r.Format()
+	if err != nil {
+		return 0.0, err
+	}
+
+	err = r.loadWavData()
+	if err != nil {
+		return 0.0, err
+	}
+
+	sec := float64(r.WavData.Size) / float64(format.BlockAlign) / float64(format.SampleRate)
+
+	return time.Duration(sec*1000000000) * time.Nanosecond, nil
+}
+
 func (r *Reader) Read(p []byte) (n int, err error) {
-	if r.WavData == nil {
-		data, err := r.readData()
-		if err != nil {
-			return n, err
-		}
-		r.WavData = data
+	err = r.loadWavData()
+	if err != nil {
+		return n, err
 	}
 
 	return r.WavData.Read(p)
@@ -163,6 +177,18 @@ func (r *Reader) readFormat() (fmt *WavFormat, err error) {
 	}
 
 	return
+}
+
+func (r *Reader) loadWavData() error {
+	if r.WavData == nil {
+		data, err := r.readData()
+		if err != nil {
+			return err
+		}
+		r.WavData = data
+	}
+
+	return nil
 }
 
 func (r *Reader) readData() (data *WavData, err error) {
