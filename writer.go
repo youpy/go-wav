@@ -35,19 +35,18 @@ func (w *Writer) WriteSamples(samples []Sample) (err error) {
 	numChannels := w.Format.NumChannels
 
 	var i, b uint16
+	var by []byte
 	for _, sample := range samples {
 		for i = 0; i < numChannels; i++ {
 			value := toUint(sample.Values[i], int(bitsPerSample))
 
 			for b = 0; b < bitsPerSample; b += 8 {
-				err = binary.Write(w, binary.LittleEndian, uint8((value>>b)&math.MaxUint8))
-				if err != nil {
-					return
-				}
+				by = append(by, uint8((value>>b)&math.MaxUint8))
 			}
 		}
 	}
 
+	_, err = w.Write(by)
 	return
 }
 
