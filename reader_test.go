@@ -1,8 +1,11 @@
 package wav
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
 	"math"
+	"os"
 	"testing"
 
 	"gotest.tools/assert"
@@ -148,4 +151,31 @@ func TestReadAlaw(t *testing.T) {
 	assert.Equal(t, len(bytes), int(reader.WavData.Size)-(1*blockAlign))
 
 	t.Logf("Data size: %d", len(bytes))
+}
+
+func BenchmarkReadSamples(b *testing.B) {
+	n := []uint32{1, 10, 100, 1000, 2000, 3000, 5000, 8000, 10000, 20000, 40000}
+
+	var t int
+
+	for _, numSamples := range n {
+		b.Run(fmt.Sprintf("%d", numSamples), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+
+				file, _ := os.Open("./files/a.wav")
+				reader := NewReader(file)
+
+				for {
+					samples, err := reader.ReadSamples(numSamples)
+					if err == io.EOF {
+						break
+					}
+					for _, sample := range samples {
+						t += reader.IntValue(sample, 0)
+						t += reader.IntValue(sample, 1)
+					}
+				}
+			}
+		})
+	}
 }

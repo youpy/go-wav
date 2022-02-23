@@ -1,6 +1,7 @@
 package wav
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -282,4 +283,32 @@ func TestWrite32BitStereo(t *testing.T) {
 	assert.Equal(t, samples[0].Values[1], -32768)
 	assert.Equal(t, samples[1].Values[0], 123)
 	assert.Equal(t, samples[1].Values[1], -123)
+}
+
+func BenchmarkWriteSamples(b *testing.B) {
+	n := 4096
+	samples := []Sample{}
+
+	file, _ := os.Open("./files/a.wav")
+	reader := NewReader(file)
+
+	for {
+		spls, err := reader.ReadSamples(uint32(n))
+		if err == io.EOF {
+			break
+		}
+		samples = append(samples, spls...)
+	}
+
+	b.Run("write samples", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			tmpfile, err := ioutil.TempFile("", "example")
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer os.Remove(tmpfile.Name())
+			writer := NewWriter(tmpfile, uint32(len(samples)), 2, 44100, 16)
+			writer.WriteSamples(samples)
+		}
+	})
 }
