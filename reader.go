@@ -167,7 +167,7 @@ func (r *Reader) readFormat() (fmt *WavFormat, err error) {
 	fmtChunk := findChunk(riffChunk, "fmt ")
 
 	if fmtChunk == nil {
-		err = errors.New("Format chunk is not found")
+		err = errors.New("format chunk is not found")
 		return
 	}
 
@@ -207,7 +207,7 @@ func (r *Reader) readData() (data *WavData, err error) {
 
 	dataChunk := findChunk(riffChunk, "data")
 	if dataChunk == nil {
-		err = errors.New("Data chunk is not found")
+		err = errors.New("data chunk is not found")
 		return
 	}
 
