@@ -3,9 +3,9 @@ module github.com/youpy/go-wav
 go 1.14
 
 require (
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.9.0
 	github.com/youpy/go-riff v0.1.0
-	github.com/zaf/g711 v0.0.0-20190814101024-76a4a538f52b
+	github.com/zaf/g711 v1.4.0
 	gotest.tools v2.2.0+incompatible
 )
 
