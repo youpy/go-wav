@@ -1,6 +1,7 @@
 package wav
 
 import (
+	"bufio"
 	"encoding/binary"
 	"io"
 	"math"
@@ -33,21 +34,22 @@ func NewWriter(w io.Writer, numSamples uint32, numChannels uint16, sampleRate ui
 func (w *Writer) WriteSamples(samples []Sample) (err error) {
 	bitsPerSample := w.Format.BitsPerSample
 	numChannels := w.Format.NumChannels
+	bytesPerSample := int(bitsPerSample/8) * int(numChannels)
+	by := make([]byte, 0, len(samples)*bytesPerSample)
 
-	var i, b uint16
-	var by []byte
 	for _, sample := range samples {
-		for i = 0; i < numChannels; i++ {
+		for i := uint16(0); i < numChannels; i++ {
 			value := toUint(sample.Values[i], int(bitsPerSample))
-
-			for b = 0; b < bitsPerSample; b += 8 {
+			for b := uint16(0); b < bitsPerSample; b += 8 {
 				by = append(by, uint8((value>>b)&math.MaxUint8))
 			}
 		}
 	}
 
-	_, err = w.Write(by)
-	return
+	bufWriter := bufio.NewWriter(w.Writer)
+	_, err = bufWriter.Write(by)
+	bufWriter.Flush()
+	return err
 }
 
 func toUint(value int, bits int) uint {
