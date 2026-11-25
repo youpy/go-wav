@@ -48,8 +48,10 @@ func (w *Writer) WriteSamples(samples []Sample) (err error) {
 
 	bufWriter := bufio.NewWriter(w.Writer)
 	_, err = bufWriter.Write(by)
-	bufWriter.Flush()
-	return err
+	if err != nil {
+		return err
+	}
+	return bufWriter.Flush()
 }
 
 func toUint(value int, bits int) uint {
