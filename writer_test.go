@@ -1,6 +1,9 @@
 package wav
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -283,6 +286,66 @@ func TestWrite32BitStereo(t *testing.T) {
 	assert.Equal(t, samples[0].Values[1], -32768)
 	assert.Equal(t, samples[1].Values[0], 123)
 	assert.Equal(t, samples[1].Values[1], -123)
+}
+
+type failingDestination struct {
+	bytes.Buffer
+	err   error
+	short bool
+}
+
+func (w *failingDestination) Write(p []byte) (int, error) {
+	if w.err != nil {
+		return 0, w.err
+	}
+	if w.short {
+		return len(p) - 1, nil
+	}
+	return w.Buffer.Write(p)
+}
+
+func TestWriteSamplesReportsDestinationErrors(t *testing.T) {
+	wantErr := errors.New("destination write failed")
+	for _, count := range []int{1, 2048, 2049} {
+		t.Run(fmt.Sprintf("write_error_%d_bytes", count*2), func(t *testing.T) {
+			dst := &failingDestination{}
+			writer := NewWriter(dst, uint32(count), 1, 8000, 16)
+			dst.err = wantErr
+			if err := writer.WriteSamples(make([]Sample, count)); !errors.Is(err, wantErr) {
+				t.Fatalf("WriteSamples error = %v, want %v", err, wantErr)
+			}
+		})
+	}
+	for _, count := range []int{1, 2048} {
+		t.Run(fmt.Sprintf("short_write_%d_bytes", count*2), func(t *testing.T) {
+			dst := &failingDestination{}
+			writer := NewWriter(dst, uint32(count), 1, 8000, 16)
+			dst.short = true
+			if err := writer.WriteSamples(make([]Sample, count)); !errors.Is(err, io.ErrShortWrite) {
+				t.Fatalf("WriteSamples error = %v, want %v", err, io.ErrShortWrite)
+			}
+		})
+	}
+}
+
+func TestWriteSamplesSuccessfulDestination(t *testing.T) {
+	for _, count := range []int{0, 1, 2048, 2049} {
+		t.Run(fmt.Sprintf("%d_bytes", count*2), func(t *testing.T) {
+			dst := &failingDestination{}
+			writer := NewWriter(dst, uint32(count), 1, 8000, 16)
+			headerSize := dst.Len()
+			samples := make([]Sample, count)
+			for i := range samples {
+				samples[i].Values[0] = 0x1234
+			}
+			if err := writer.WriteSamples(samples); err != nil {
+				t.Fatal(err)
+			}
+			if got, want := dst.Bytes()[headerSize:], bytes.Repeat([]byte{0x34, 0x12}, count); !bytes.Equal(got, want) {
+				t.Fatalf("encoded sample bytes differ: got %d bytes, want %d", len(got), len(want))
+			}
+		})
+	}
 }
 
 func BenchmarkWriteSamples(b *testing.B) {
